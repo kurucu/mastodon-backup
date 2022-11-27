@@ -1,27 +1,43 @@
----
-Description: "Backup your essential Mastodon files to an S3 bucket!"
-Notes: > "This uses some simple scripts and cronjobs to create backups to a specified S3 bucket."
-Author: "HasHooves"
-ProjectPage: "https://github.com/HasHooves/mastodon-backup"
----
+# mastodon-backup: Backup your essential Mastodon files using rsync!
 
-# mastodon-backup
+A small package to of scripts and a cronjob to create rsync backups for your mastodon instance.
 
-Backup your essential Mastodon files to an S3 bucket!
+This set of scripts was created to automate some of the basic maintenance that I would normally use to cleanup and make backups of my mastodon instance, based on [HasHooves' version for S3](https://github.com/HasHooves/mastodon-backup).
 
-This set of scripts was created to automate some of the basic maintenance that I would normally use to cleanup and make backups of my mastodon instance.
+## Prerequisites
 
-Feel free to use this backup script to help keep your instance clean too!
+These scripts assume that you have access to an rsync-enabled account, with snapshots enabled.
 
-## Configure the AWS credentials
+As such, the files will not be timestamped or rotated - they will just be periodically copied to the destination. You can browse your snapshots to recover from an earlier point in time.
 
-- Install the `AWS CLI`
-  - > NOTE: This script requires that `aws configure` has already been completed for the `root` user before being ran for the first time
-- Fill out the `example_config.sh` file with your information for AWS, and then move it to `config/config.sh`
+## Install these scripts
+
+On your Mastodon server, log on and move to `/opt` (or your preferred location) and clone this repo
+
+```bash
+sudo su
+cd /opt
+git clone git@github.com:kurucu/mastodon-backup.git
+cd mastodon-backup
+```
+
+## Configure the credentials and details
+
+- Install rsync on the server, if you don't already have it
+- Place a copy of your Mastodon instance root _public_ key in `~/.ssh/authorized_keys` on the rsync server
+- Copy `example_config.sh` to `config/config.sh`, and then fill it out with your details
+
+```bash
+cp example_config.sh config/config.sh
+nano config/config.sh
+```
+
+Update, as a minimum, the `rsync_destination` variable, and then press `ctrl-o` to save and `ctrl-x` to exit.
 
 ## Prepare the script files
 
 - Set the two files as executable:
+
 ```bash
 chmod +x backup.sh
 chmod +x config/config.sh
@@ -31,15 +47,13 @@ chmod +x config/config.sh
 
 ### Setting up automated backups
 
-- Add this line to your `root` crontab to ensure that the backups are being ran `daily` and a log is being generated:
+Add this line to the crontab for your `root` user, to run the backup daily and to generate a log.
 
 ```bash
 0 3 * * * /opt/mastodon-backup/backup.sh > /opt/mastodon-backup/logs/backup.log 2>&1
 ```
 
-### Weekly restart of server
-
-- Add this line to the `root` crontab to ensure that a `weekly` restart is occuring:
+This, optional one, restarts your server weekly.
 
 ```bash
 0 0 * * 0 /sbin/shutdown -r now
@@ -47,12 +61,9 @@ chmod +x config/config.sh
 
 ### Automatic media cleanup
 
-- > NOTE: This should be set for the `mastodon` account and not set as the `root` user
-- Add this line to the `mastodon` user's crontab to ensure that the media is being cleaned out daily and capped at `7` days:
+If you have followed the [mastodon installation instructions](https://docs.joinmastodon.org/admin/setup/#cleanup), you have two cron jobs running already. One removes old media, and the other removes old preview cards.
 
-```bash
-@daily cd /home/mastodon/live && RAILS_ENV=production bin/tootctl media remove --days=7
-```
+Ensure these are installed now.
 
 ### Restart Cron
 
