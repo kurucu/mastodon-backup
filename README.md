@@ -17,7 +17,7 @@ On your Mastodon server, log on and move to `/opt` (or your preferred location) 
 ```bash
 sudo su
 cd /opt
-git clone git@github.com:kurucu/mastodon-backup.git
+git clone https://github.com/kurucu/mastodon-backup.git
 cd mastodon-backup
 ```
 
@@ -48,6 +48,8 @@ chmod +x config/config.sh
 ### Setting up automated backups
 
 Add this line to the crontab for your `root` user, to run the backup daily and to generate a log.
+
+The `3` is for 3am - assuming the time on your server is UTC, you may want to adjust this for where you are. For example, mine runs at 17 (i.e. 5pm), which is around 3am in Australia/Melbourne, depending on the time of year.
 
 ```bash
 0 3 * * * /opt/mastodon-backup/backup.sh > /opt/mastodon-backup/logs/backup.log 2>&1
