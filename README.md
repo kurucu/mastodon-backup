@@ -49,17 +49,18 @@ chmod +x config/config.sh
 
 Add this line to the crontab for your `root` user, to run the backup daily and to generate a log.
 
-The `3` is for 3am - assuming the time on your server is UTC, you may want to adjust this for where you are. For example, mine runs at 17 (i.e. 5pm), which is around 3am in Australia/Melbourne, depending on the time of year.
-
 ```bash
 0 3 * * * /opt/mastodon-backup/backup.sh > /opt/mastodon-backup/logs/backup.log 2>&1
 ```
 
-This, optional one, restarts your server weekly.
+This, optional, one restarts your server weekly at midnight on a Sunday.
 
 ```bash
 0 0 * * 0 /sbin/shutdown -r now
 ```
+
+> Note: The `3` in the first one is for 3am. Assuming the time on your server is UTC, you may want to adjust this for where you are. For example, mine runs at 17 (i.e. 5pm), which is around 3am in Australia/Melbourne, depending on the time of year.
+> You can use `timedatectl` to check the time and date on your server.
 
 ### Automatic media cleanup
 
